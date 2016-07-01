@@ -21,7 +21,9 @@ Sketch plugin for generating table of contents for Mozilla Spec Documentations.
 6. Topic B (using Header1)
 7. Topic B-1 (using Header2)
 8. Topic B-2 (using Header2)  
-...etc.
+9. Topic C (using Header1)  
+...
+Checkout the Example Sketch file for more information.
 
 ![Example Structure](https://raw.githubusercontent.com/youwenliang/Table-of-Contents/master/Sketch%20Artboards.png)
 
