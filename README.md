@@ -30,4 +30,4 @@ Checkout the Example Sketch file for more information: https://github.com/youwen
 ![Example Structure](https://raw.githubusercontent.com/youwenliang/Table-of-Contents/master/Sketch%20Artboards.png)
 
 Table of Contents will be generated after the Cover artboard.
-You can use "control + option + command + T" as a shortcut to generate Table of Contents.
+Shortcut: **"control + option + command + T"**
