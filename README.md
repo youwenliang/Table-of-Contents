@@ -29,5 +29,5 @@ Checkout the Example Sketch file for more information: https://github.com/youwen
 
 ![Example Structure](https://raw.githubusercontent.com/youwenliang/Table-of-Contents/master/Sketch%20Artboards.png)
 
-Table of Contents will be generated after the Cover artboard.
-Shortcut: **"control + option + command + T"**
+Table of Contents will be generated after the Cover artboard.  
+Shortcut: <kbd>control</kbd> + <kbd>option</kbd> + <kbd>⌘command</kbd> + <kbd>T</kbd>
