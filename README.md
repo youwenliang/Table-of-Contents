@@ -1,5 +1,5 @@
 # Table-of-Contents
-Sketch plugin for generating table of contents for documentations
+Sketch plugin for generating table of contents for Mozilla Spec Documentations.
 
 ## Artboads Setup
 1. Artboard size: 1440 x 1024.
