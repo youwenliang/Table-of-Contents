@@ -1,0 +1,23 @@
+{
+  "author" : "Mark Liang",
+  "commands" : [
+    {
+      "script" : "script.cocoascript",
+      "handler" : "onRun",
+      "shortcut" : "cmd ctrl option t",
+      "name" : "Table of Contents",
+      "identifier" : "tableofcontents"
+    },
+  ],
+  "menu": {
+    "isRoot": true,
+    "items": [
+      "tableofcontents",
+    ],
+  },
+  "identifier" : "com.example.sketch.tableofcontents",
+  "version" : "1.0",
+  "description" : "Sketch Plugin for creating a Table of Contents artboard automatically.",
+  "authorEmail" : "mliang@mozilla.com",
+  "name" : "Table of Contents"
+}
