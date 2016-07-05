@@ -67,7 +67,6 @@ var onRun = function(context) {
     // Create contents with all artboard names
     for(var i = 1; i < [artboards length]; i++) {
       var temp = artboards[numberArtboard-1-i];
-      print("!!!???!!!");
       var l = (temp.children().toString().match(/</g) || []).length;
       
       if(l <= 1) ;
@@ -80,21 +79,33 @@ var onRun = function(context) {
         if(title.indexOf("cont") > -1) ;
         else {
           if(header == 2 && count != 0) {
+            var titleNumber = count + "." + k + " ";
+            if(userInput.titleN == 0) {
+              titleNumber = "-";
+            }
             var textLayer = SketchLib.addTextLayer(group, {
-              "name": [temp name], "text": "    " + (count) + "." + k + " " + title, "fontSize": userInput.fsize,
+                "name": [temp name], "text": "    " + titleNumber + title, "fontSize": userInput.fsize,
             });
-            var numberLayer = SketchLib.addTextLayer(group, {
-              "name": i+"", "text": i+"", "fontSize": userInput.fsize,
-            });
+            if(userInput.pageN == 1) {
+              var numberLayer = SketchLib.addTextLayer(group, {
+                "name": i+"", "text": i+"", "fontSize": userInput.fsize,
+              });
+            }
             k++
           } else {
             count++;
+            var titleNumber = count + ". ";
+            if(userInput.titleN == 0) {
+              titleNumber = "";
+            }
             var textLayer = SketchLib.addTextLayer(group, {
-              "name": [temp name], "text": (count) + ". " + title, "fontSize": userInput.fsize,
+              "name": [temp name], "text": titleNumber + title, "fontSize": userInput.fsize,
             });
-            var numberLayer = SketchLib.addTextLayer(group, {
-              "name": i+"", "text": i+"", "fontSize": userInput.fsize,
-            });
+            if(userInput.pageN == 1) {
+              var numberLayer = SketchLib.addTextLayer(group, {
+                "name": i+"", "text": i+"", "fontSize": userInput.fsize,
+              });
+            }
             k = 1;
           }
 
@@ -105,10 +116,12 @@ var onRun = function(context) {
           textLayer.textColor = MSColor.colorWithSVGString("#FFF");
           textLayer.fontPostscriptName = "Fira Sans";
 
-          numberLayer.frame().x = 500;
-          numberLayer.frame().y = 100+add*(24+parseInt(userInput.margin)) + 120;
-          numberLayer.textColor = MSColor.colorWithSVGString("#FFF");
-          numberLayer.fontPostscriptName = "Fira Sans";
+          if(userInput.pageN == 1) {
+            numberLayer.frame().x = 500;
+            numberLayer.frame().y = 100+add*(24+parseInt(userInput.margin)) + 120;
+            numberLayer.textColor = MSColor.colorWithSVGString("#FFF");
+            numberLayer.fontPostscriptName = "Fira Sans";
+          }
 
           add++;
         }
@@ -121,6 +134,22 @@ var onRun = function(context) {
     [[doc currentView] centerRect:[group rect]];
   }
 };
+
+// Checkbox
+var regexpRename = regexpRename || {};
+
+regexpRename.createCheckbox = function ( label, value, flag ) {
+  
+  flag = ( flag == false ) ? NSOffState : NSOnState;
+
+  var checkbox = NSButton.alloc().initWithFrame( NSMakeRect( 0, 0, 300, 18 ) );
+  checkbox.setButtonType( NSSwitchButton );
+  checkbox.setTitle( label );
+  checkbox.setTag( value );
+  checkbox.setState( flag );
+
+  return checkbox;
+}
 
 // Show Dialog
 function showAlertWindow() {
@@ -136,6 +165,9 @@ function showAlertWindow() {
   alertWindow.addTextLabelWithValue('Enter contents font size')
   alertWindow.addTextFieldWithValue('20')
 
+  alertWindow.addAccessoryView( regexpRename.createCheckbox( 'Add numbers to title', 'a', true ) )
+  alertWindow.addAccessoryView( regexpRename.createCheckbox( 'Show page numbers', 's', true ) )
+
   alertWindow.addButtonWithTitle('OK')
   alertWindow.addButtonWithTitle('Cancel')
 
@@ -143,7 +175,9 @@ function showAlertWindow() {
       return new UserInput(
           alertWindow.viewAtIndex(1).stringValue(),
           alertWindow.viewAtIndex(3).stringValue(),
-          alertWindow.viewAtIndex(5).stringValue()
+          alertWindow.viewAtIndex(5).stringValue(),
+          alertWindow.viewAtIndex(6).state(),
+          alertWindow.viewAtIndex(7).state()
       )
   } else {
       return null
@@ -151,8 +185,10 @@ function showAlertWindow() {
 }
 
 // Dialog Results
-function UserInput(color, margin, fsize) {
+function UserInput(color, margin, fsize, titleN, pageN) {
     this.color = color
     this.margin = margin
     this.fsize = fsize
+    this.titleN = titleN
+    this.pageN = pageN
 }
