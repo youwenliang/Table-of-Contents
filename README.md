@@ -11,6 +11,7 @@ Sketch plugin for generating table of contents for Mozilla Spec Documentations.
 2. Use **Overrides** to change the text for "Header1" & "Header2".
 3. "Header1" & "Header2" have to be the first(top) layer within an artboard.
 4. If a section has multiple artboards, add **"(cont.)"** to the title for additional artboards.
+5. If you have third level titles or more levels, you don't need to convert them to symbol, it will simply ignore it.
 
 ## Example File structure
 1. Cover
