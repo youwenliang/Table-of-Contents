@@ -32,3 +32,9 @@ Checkout the Example Sketch file for more information: https://github.com/youwen
 
 Table of Contents will be generated after the Cover artboard.  
 Shortcut: <kbd>control</kbd> + <kbd>option</kbd> + <kbd>⌘command</kbd> + <kbd>T</kbd>
+
+## Additional Options:  
+You can change the artboard background color, or change the margin and font size according to the amount of your contents.
+You can also check / uncheck to show or hide the page numbers and title prefix numbers.  
+
+![Options](https://github.com/youwenliang/Table-of-Contents/blob/master/Sketch%20Options.png)
