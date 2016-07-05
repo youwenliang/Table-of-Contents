@@ -2,9 +2,9 @@
 Sketch plugin for generating table of contents for Mozilla Spec Documentations.
 
 ## Artboads Setup
-1. Artboard size: 1440 x 1024.
+1. Artboard size: 1440 x 1024 preferred.
 2. Artboard order: top first (Export as PDF order).
-3. Having a Cover as the first artboard.
+3. Having a Cover as the first artboard & Release Notes as the second.
 
 ## Titles Setup
 1. Use **Symbols** "Header1" & "Header2" as first level titles & second level titles.
