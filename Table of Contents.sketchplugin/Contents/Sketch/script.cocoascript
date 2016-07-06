@@ -6,138 +6,17 @@ var onRun = function(context) {
   var plugin = context.plugin;               // the plugin (MSPluginBundle)
   var page = [doc currentPage];              // the current page (MSPage)
   var artboards = doc.currentPage().artboards();
-
+  var numberArtboard = [artboards length];
   // Prompt Dialog
-  var userInput = showAlertWindow();
-
-  if(userInput != null) {
-
-    // Create New Artboard
-    var newArtboard = [MSArtboardGroup new];
-    var newArtboardFrame = [newArtboard frame]
-    var numberArtboard = [artboards length];
-    var firstArtboard = artboards[numberArtboard-2];
-
-    newArtboard.name = [plugin name]
-    newArtboardWidth = [[firstArtboard frame] width]
-    newArtboardHeight = [[firstArtboard frame] height]
-    newArtboardX = [[firstArtboard frame] x]
-    newArtboardY = [[firstArtboard frame] y] - (newArtboardHeight + 300)
-
-    [newArtboardFrame setWidth:newArtboardWidth]
-    [newArtboardFrame setHeight:newArtboardHeight]
-    [newArtboardFrame setX:newArtboardX]
-    [newArtboardFrame setY:newArtboardY]
-    [page addLayers: [newArtboard]];
-
-    artboards = doc.currentPage().artboards();
-    var coverA = artboards[numberArtboard-1];
-    var tableA = artboards[numberArtboard];
-    artboards[numberArtboard-1] = tableA;
-    artboards[numberArtboard] = coverA;
-
-    // Create Background Rect
-    var shape = SketchLib.addShapeLayer(newArtboard, {"name": "background"});
-    var shapeFrame = [shape frame]
-    [shapeFrame setWidth:newArtboardWidth]
-    [shapeFrame setHeight:newArtboardHeight]
-    var shapeFill = shape.style().addStylePartOfType(0);
-    shapeFill.color = MSColor.colorWithSVGString(userInput.color);
-
-    // Create a new group to contain the new layers (MSLayerGroup)
-    var group = SketchLib.addLayerGroup(newArtboard, {"name": [plugin name]});
-    var groupFrame = [group frame]
-    [groupFrame setWidth:newArtboardWidth]
-    [groupFrame setHeight:newArtboardHeight]
-
-    // Create a "Table of Contents" text layer
-    var textLayer = SketchLib.addTextLayer(group, {
-      "name": "Table of Contents", "text": "Table of Contents", "fontSize": 44,
-    });
-    // set content position
-    textLayer.frame().x = 100;
-    textLayer.frame().y = 100;
-    textLayer.textColor = MSColor.colorWithSVGString("#FFF");
-    textLayer.fontPostscriptName = "Fira Sans Light Italic";
-
-    var count = 0;
-    var add = 1;
-    var k = 1;
-    
-    // Create contents with all artboard names
-    for(var i = 1; i < [artboards length]; i++) {
-      var temp = artboards[numberArtboard-1-i];
-      var l = (temp.children().toString().match(/</g) || []).length;
-
-      if(l <= 1) ;
-      else if(temp.children()[l-2].toString().split("Header")[1] == null) ;
-      else {
-
-        var header = temp.children()[l-2].toString().split("Header")[1].split(" ")[0];
-        var title = temp.children()[l-2].overrides().toString().split("=")[2].split(";")[0].replace('"','').replace('"','');
-        var page = parseInt(i)+2
-
-        if(header == 2 && userInput.pageN == 1) {
-          var pnumberLayer = SketchLib.addTextLayer(temp, {
-            "name": page+"", "text": page+"", "fontSize": 16,
-          });
-          pnumberLayer.frame().x = newArtboardWidth-50;
-          pnumberLayer.frame().y = newArtboardHeight-50;
-          pnumberLayer.textColor = MSColor.colorWithSVGString("#484848");
-          pnumberLayer.fontPostscriptName = "Fira Sans";
-        }
-
-        if(title.indexOf("cont") > -1) ;
-        else {
-          if(header == 2 && count != 0) {
-            var titleNumber = count + "." + k + " ";
-            if(userInput.titleN == 0) {
-              titleNumber = "-";
-            }
-            var textLayer = SketchLib.addTextLayer(group, {
-                "name": [temp name], "text": "    " + titleNumber + title, "fontSize": userInput.fsize,
-            });
-            k++
-          } else {
-            count++;
-            var titleNumber = count + ". ";
-            if(userInput.titleN == 0) {
-              titleNumber = "";
-            }
-            var textLayer = SketchLib.addTextLayer(group, {
-              "name": [temp name], "text": titleNumber + title, "fontSize": userInput.fsize,
-            });
-            k = 1;
-          }
-          if(userInput.pageN == 1) {
-            var numberLayer = SketchLib.addTextLayer(group, {
-              "name": page+"", "text": page+"", "fontSize": userInput.fsize,
-            });
-          }
-
-          print([temp name]);print("!!!");
-          // set content position
-          textLayer.frame().x = 100;
-          textLayer.frame().y = 100+add*(24+parseInt(userInput.margin)) + 120;
-          textLayer.textColor = MSColor.colorWithSVGString("#FFF");
-          textLayer.fontPostscriptName = "Fira Sans";
-
-          if(userInput.pageN == 1) {
-            numberLayer.frame().x = 500;
-            numberLayer.frame().y = 100+add*(24+parseInt(userInput.margin)) + 120;
-            numberLayer.textColor = MSColor.colorWithSVGString("#FFF");
-            numberLayer.fontPostscriptName = "Fira Sans";
-          }
-
-          add++;
-        }
-      }
+  if(numberArtboard > 2) {
+    var t = artboards[numberArtboard-2];
+    if([t name] == "Table of Contents") {
+      showCheckWindow(doc, plugin, page, artboards, numberArtboard);
     }
-
-    // resize the group to contain its children
-    [group resizeRoot:true];
-    // center the view on our new group
-    [[doc currentView] centerRect:[group rect]];
+    else {
+      addTableOfContents(doc, plugin, page, artboards, numberArtboard, context);
+      [doc showMessage: "Table of Contents created."]
+    }
   }
 };
 
@@ -155,6 +34,172 @@ regexpRename.createCheckbox = function ( label, value, flag ) {
   checkbox.setState( flag );
 
   return checkbox;
+}
+
+function showCheckWindow(doc, plugin, page, artboards, numberArtboard) {
+  var alertWindow = COSAlertWindow.new()
+  alertWindow.setMessageText('Do you want to refresh or delete your Table of Contents?')
+
+  alertWindow.addButtonWithTitle('Refresh')
+  alertWindow.addButtonWithTitle('Delete')
+
+
+  if (alertWindow.runModal() == -NSModalResponseStop) {
+    deleteTableOfContents(artboards);
+    var a = doc.currentPage().artboards();
+    var n = [a length];
+    addTableOfContents(doc, plugin, page, a, n);
+    [doc showMessage: "Table of Contents refreshed."]
+
+  } else {
+    deleteTableOfContents(artboards);
+    [doc showMessage: "Table of Contents deleted."]
+  }
+}
+
+function addTableOfContents(doc, plugin, page, artboards, numberArtboard, context) {
+      var userInput = showAlertWindow();
+      if(userInput != null) {
+
+        // Create New Artboard
+        var newArtboard = [MSArtboardGroup new];
+        var newArtboardFrame = [newArtboard frame]
+        var firstArtboard = artboards[numberArtboard-2];
+
+        newArtboard.name = [plugin name]
+        newArtboardWidth = [[firstArtboard frame] width]
+        newArtboardHeight = [[firstArtboard frame] height]
+        newArtboardX = [[firstArtboard frame] x]
+        newArtboardY = [[firstArtboard frame] y] - (newArtboardHeight + 300)
+
+        [newArtboardFrame setWidth:newArtboardWidth]
+        [newArtboardFrame setHeight:newArtboardHeight]
+        [newArtboardFrame setX:newArtboardX]
+        [newArtboardFrame setY:newArtboardY]
+        [page addLayers: [newArtboard]];
+
+
+        // Create Background Rect
+        var shape = SketchLib.addShapeLayer(newArtboard, {"name": "background"});
+        var shapeFrame = [shape frame]
+        [shapeFrame setWidth:newArtboardWidth]
+        [shapeFrame setHeight:newArtboardHeight]
+        var shapeFill = shape.style().addStylePartOfType(0);
+        shapeFill.color = MSColor.colorWithSVGString(userInput.color);
+
+        // Create a new group to contain the new layers (MSLayerGroup)
+        var group = SketchLib.addLayerGroup(newArtboard, {"name": [plugin name]});
+        var groupFrame = [group frame]
+        [groupFrame setWidth:newArtboardWidth]
+        [groupFrame setHeight:newArtboardHeight]
+
+        // Create a "Table of Contents" text layer
+        var textLayer = SketchLib.addTextLayer(group, {
+          "name": "Table of Contents", "text": "Table of Contents", "fontSize": 44,
+        });
+        // set content position
+        textLayer.frame().x = 100;
+        textLayer.frame().y = 100;
+        textLayer.textColor = MSColor.colorWithSVGString("#FFF");
+        textLayer.fontPostscriptName = "Fira Sans Light Italic";
+
+        var count = 0;
+        var add = 1;
+        var k = 1;
+        
+        // Create contents with all artboard names
+        for(var i = 1; i < [artboards length]; i++) {
+          var temp = artboards[numberArtboard-1-i];
+          var l = (temp.children().toString().match(/</g) || []).length;
+
+          if(l <= 1) ;
+          else if(temp.children()[l-2].toString().split("Header")[1] == null) ;
+          else {
+
+            var header = temp.children()[l-2].toString().split("Header")[1].split(" ")[0];
+            var title = temp.children()[l-2].overrides().toString().split("=")[2].split(";")[0].replace('"','').replace('"','');
+            var page = parseInt(i)+2
+
+            if(header == 2 && userInput.pageN == 1) {
+              var pnumberLayer = SketchLib.addTextLayer(temp, {
+                "name": "Page Number", "text": page+"", "fontSize": 16,
+              });
+              pnumberLayer.frame().x = newArtboardWidth-50;
+              pnumberLayer.frame().y = newArtboardHeight-50;
+              pnumberLayer.textColor = MSColor.colorWithSVGString("#484848");
+              pnumberLayer.fontPostscriptName = "Fira Sans";
+            }
+
+            if(title.indexOf("cont") > -1) ;
+            else {
+              if(header == 2 && count != 0) {
+                var titleNumber = count + "." + k + " ";
+                if(userInput.titleN == 0) {
+                  titleNumber = "-";
+                }
+                var textLayer = SketchLib.addTextLayer(group, {
+                    "name": [temp name], "text": "    " + titleNumber + title, "fontSize": userInput.fsize,
+                });
+                k++
+              } else {
+                count++;
+                var titleNumber = count + ". ";
+                if(userInput.titleN == 0) {
+                  titleNumber = "";
+                }
+                var textLayer = SketchLib.addTextLayer(group, {
+                  "name": [temp name], "text": titleNumber + title, "fontSize": userInput.fsize,
+                });
+                k = 1;
+              }
+              if(userInput.pageN == 1) {
+                var numberLayer = SketchLib.addTextLayer(group, {
+                  "name": page+"", "text": page+"", "fontSize": userInput.fsize,
+                });
+              }
+
+              // set content position
+              textLayer.frame().x = 100;
+              textLayer.frame().y = 100+add*(24+parseInt(userInput.margin)) + 120;
+              textLayer.textColor = MSColor.colorWithSVGString("#FFF");
+              textLayer.fontPostscriptName = "Fira Sans";
+
+              if(userInput.pageN == 1) {
+                numberLayer.frame().x = 500;
+                numberLayer.frame().y = 100+add*(24+parseInt(userInput.margin)) + 120;
+                numberLayer.textColor = MSColor.colorWithSVGString("#FFF");
+                numberLayer.fontPostscriptName = "Fira Sans";
+              }
+
+              add++;
+            }
+          }
+        }
+        artboards = doc.currentPage().artboards()
+        
+        var selection = [artboards subarrayWithRange:NSMakeRange(numberArtboard-1,2)];
+        var moveBack = sendActionTimes.bind(null, context, 'moveBackward:')
+        getSteps(selection, sortLayers(selection, false))
+          .forEach(function(steps) {
+            moveBack(steps.layer, steps.steps)
+          })
+      }
+}
+
+function deleteTableOfContents(a){
+  var n = [a length]
+    a[n-2].removeFromParent();
+    for(var i = 0; i < n-2; i++) {
+      var temp = a[i];
+      var l = (temp.children().toString().match(/</g) || []).length;
+      
+      for(var j = 0; j < l; j++) {
+        if(temp.children()[j].name() == "Page Number") {
+          temp.children()[j].removeFromParent();
+          break;
+        }
+      }
+    }
 }
 
 // Show Dialog
@@ -197,4 +242,130 @@ function UserInput(color, margin, fsize, titleN, pageN) {
     this.fsize = fsize
     this.titleN = titleN
     this.pageN = pageN
+}
+
+
+
+/**
+ * @param {NSMutableArray} array
+ * @param {Number} atIndex
+ * @param {Number} toIndex
+ * @returns {NSMutableArray}
+ */
+
+function moveObject(array, atIndex, toIndex) {
+  if (atIndex != toIndex) {
+    var object = [[[array objectAtIndex:atIndex] retain] autorelease]
+
+    [array removeObjectAtIndex:atIndex]
+    [array insertObject:object atIndex:toIndex]
+  }
+
+  return array
+}
+
+
+
+/**
+ * Sets `isSelected` to `true` for all given layers
+ * @param {NSArray.<MSShapeGroup>} layers
+ */
+
+function restoreSelection(layers) {
+  var loop = [layers objectEnumerator]
+
+  while (layer = [loop nextObject]) {
+    [layer setIsSelected:true]
+  }
+}
+
+
+
+/**
+ * Makes `NSApp sendAction` for `layer` `times` times
+ * @param {NSDictionary} context
+ * @param {String} action
+ * @param {MSShapeGroup} layer
+ * @param {Number} times
+ */
+
+function sendActionTimes(context, action, object, times) {
+  var doc = context.document
+
+  [[doc currentPage] deselectAllLayers]
+  [object setIsSelected:true]
+
+  for (var i = 0; i < times; i++) {
+    [NSApp sendAction:action to:nil from:doc]
+  }
+
+  restoreSelection(context.selection)
+}
+
+
+
+/**
+ * Returns layers sorted by first number in name
+ * @param {NSArray.<MSShapeGroup>} layers
+ * @returns {NSArray.<MSShapeGroup>}
+ */
+
+function sortLayers(layers, isAscending) {
+  var sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:'name'
+                                         ascending:isAscending
+                                         selector:'localizedStandardCompare:']
+
+  return [layers sortedArrayUsingDescriptors:[sortDescriptor]]
+}
+
+
+
+/**
+ * @typedef {Object} StepsStruct
+ * @property {MSShapeGroup} layer
+ * @property {Number} steps
+ */
+
+/**
+ * Returns the quantity of steps that needed to reorder `layers`
+ * in according to order of `sortedLayers`
+ * @param {NSArray.<MSShapeGroup>} selection
+ * @param {NSArray.<MSShapeGroup>} sortedLayers
+ * @returns {Array.<StepsStruct>}
+ */
+
+function getSteps(selection, sortedLayers) {
+  var steps = []
+  var selectedLayers = [selection mutableCopy]
+
+  for (var i = 0; i < [sortedLayers count]; i++) {
+    var layer = [sortedLayers objectAtIndex:i]
+    var index = [selectedLayers indexOfObject:layer]
+
+    steps.push({ layer: layer, steps: index - i })
+
+    selectedLayers = moveObject(selectedLayers, index, i)
+  }
+
+  return steps
+}
+
+
+
+/**
+ * @param {NSArray.<MSShapeGroup>} selection
+ * @returns {String}
+ */
+
+function getObjectName(selection) {
+  var object = [selection firstObject]
+
+  switch ([object class]) {
+    case [MSShapeGroup class]:
+      return 'layers'
+    case [MSArtboardGroup class]:
+      return 'artboards'
+    default:
+      return 'objects'
+  }
 }
