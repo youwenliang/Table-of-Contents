@@ -11,7 +11,7 @@ var onRun = function(context) {
   if(numberArtboard > 2) {
     var t = artboards[numberArtboard-2];
     if([t name] == "Table of Contents") {
-      showCheckWindow(doc, plugin, page, artboards, numberArtboard);
+      showCheckWindow(doc, plugin, page, artboards, numberArtboard, context);
     }
     else {
       addTableOfContents(doc, plugin, page, artboards, numberArtboard, context);
@@ -36,7 +36,7 @@ regexpRename.createCheckbox = function ( label, value, flag ) {
   return checkbox;
 }
 
-function showCheckWindow(doc, plugin, page, artboards, numberArtboard) {
+function showCheckWindow(doc, plugin, page, artboards, numberArtboard, context) {
   var alertWindow = COSAlertWindow.new()
   alertWindow.setMessageText('Do you want to refresh or delete your Table of Contents?')
 
@@ -48,7 +48,7 @@ function showCheckWindow(doc, plugin, page, artboards, numberArtboard) {
     deleteTableOfContents(artboards);
     var a = doc.currentPage().artboards();
     var n = [a length];
-    addTableOfContents(doc, plugin, page, a, n);
+    addTableOfContents(doc, plugin, page, a, n, context);
     [doc showMessage: "Table of Contents refreshed."]
 
   } else {
