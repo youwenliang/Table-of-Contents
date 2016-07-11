@@ -29,7 +29,7 @@ Sketch plugin for generating table of contents for Mozilla Spec Documentations.
 Checkout the Example Sketch file for more information: https://github.com/youwenliang/Table-of-Contents/blob/master/Example.sketch
 
 ![Example Structure](https://github.com/youwenliang/Table-of-Contents/blob/master/Images/Sketch%20Artboards.png)
-![Table Of Contents](https://github.com/youwenliang/Table-of-Contents/blob/master/Images/Sketch%20Artboards1.png)
+![Table Of Contents](https://github.com/youwenliang/Table-of-Contents/blob/master/Images/Sketch%20Arboards1.png)
 
 Table of Contents will be generated after the Cover artboard.  
 Shortcut: <kbd>control</kbd> + <kbd>option</kbd> + <kbd>⌘command</kbd> + <kbd>T</kbd>
