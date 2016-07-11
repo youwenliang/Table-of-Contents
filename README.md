@@ -38,8 +38,10 @@ Shortcut: <kbd>control</kbd> + <kbd>option</kbd> + <kbd>⌘command</kbd> + <kbd>
 You can change the artboard background color, or change the margin and font size according to the amount of your contents.
 You can also check / uncheck to show or hide the page numbers and title prefix numbers.
 
-![Options](https://github.com/youwenliang/Table-of-Contents/blob/master/Sketch%20Options.png)
+![Options](https://raw.githubusercontent.com/youwenliang/Table-of-Contents/master/Sketch%20Options.png)
 
 
 ## Updates: 
 If you've already generated a Table of Contents, you can click the button (<kbd>control</kbd> + <kbd>option</kbd> + <kbd>⌘command</kbd> + <kbd>T</kbd>) again to refresh or delete your current Table of Contents.
+
+![Options](https://github.com/youwenliang/Table-of-Contents/blob/master/Images/Sketch%20Options1.png)
