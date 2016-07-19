@@ -104,7 +104,7 @@ function addTableOfContents(doc, plugin, page, artboards, numberArtboard, contex
         textLayer.fontPostscriptName = "Fira Sans Light Italic";
 
         var count = 0;
-        var add = 1;
+        var add = 0;
         var k = 1;
         
         // Create contents with all artboard names
@@ -127,7 +127,7 @@ function addTableOfContents(doc, plugin, page, artboards, numberArtboard, contex
               pnumberLayer.frame().x = newArtboardWidth-50;
               pnumberLayer.frame().y = newArtboardHeight-50;
               pnumberLayer.textColor = MSColor.colorWithSVGString("#484848");
-              pnumberLayer.fontPostscriptName = "Fira Sans";
+              pnumberLayer.fontPostscriptName = "Fira Sans Light";
             }
 
             if(title.indexOf("cont") > -1) ;
@@ -159,14 +159,14 @@ function addTableOfContents(doc, plugin, page, artboards, numberArtboard, contex
               }
 
               // set content position
-              textLayer.frame().x = 100;
-              textLayer.frame().y = 100+add*(24+parseInt(userInput.margin)) + 120;
+              textLayer.frame().x = 100 + 500*parseInt(add/15);
+              textLayer.frame().y = 100+(add%15)*(24+parseInt(userInput.margin)) + 120;
               textLayer.textColor = MSColor.colorWithSVGString("#FFF");
               textLayer.fontPostscriptName = "Fira Sans";
 
               if(userInput.pageN == 1) {
-                numberLayer.frame().x = 500;
-                numberLayer.frame().y = 100+add*(24+parseInt(userInput.margin)) + 120;
+                numberLayer.frame().x = 500 + 500*parseInt(add/15);
+                numberLayer.frame().y = 100+(add%15)*(24+parseInt(userInput.margin)) + 120;
                 numberLayer.textColor = MSColor.colorWithSVGString("#FFF");
                 numberLayer.fontPostscriptName = "Fira Sans";
               }
