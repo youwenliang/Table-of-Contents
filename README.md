@@ -1,8 +1,8 @@
 # Table-of-Contents
-Sketch plugin for generating table of contents for Mozilla Spec Documentations.
+This is a Sketch Plugin I created upon a request from our Mozilla UX team. As a memember of the UX team we usually have to create different specs using Sketch, and we have to manually add a "Table of Contents" page to list out the contents. For this plugin you can just press the shortcut and it will automatically generate a Table of Contents page for you. (There are some rules to follow when you create your spec.)
 
 ## Artboads Setup
-1. Artboard size: 1440 x 1024 preferred.
+1. Artboard size: larger than 1440 x 1024 preferred.
 2. Artboard order: top first (Export as PDF order).
 3. Having a Cover as the first artboard & Release Notes as the second.
 
