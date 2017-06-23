@@ -167,8 +167,8 @@ function addTableOfContents(doc, plugin, page, artboards, numberArtboard, contex
           else {
 
             var header = temp.children()[l-2].toString().split("Header")[1].split(" ")[0];
-            var title = temp.children()[l-2].overrides().toString().split("=")[2].split(";")[0].replace('"','').replace('"','');
-            var page = parseInt(i)+2
+            var title = temp.children()[l-2].overrides().toString().split('" = "')[1].split('"')[0];
+            var page = parseInt(i)+2;
 
             if(header == 2 && userInput.pageN == 1) {
                 var pnumberLayer = MSTextLayer.new();
