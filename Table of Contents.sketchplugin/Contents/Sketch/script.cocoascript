@@ -1,4 +1,4 @@
-
+  
 @import "library.cocoascript";
 
 var onRun = function(context) {
@@ -12,17 +12,16 @@ var onRun = function(context) {
 
   // Prompt Dialog
   if(numberArtboard > 2) {
-    var t = artboards[numberArtboard-2];
+    var t = artboards[numberArtboard-1];
     if([t name] == "Table of Contents") {
-      showCheckWindow(doc, plugin, page, artboards, numberArtboard, context, document);
+      showCheckWindow(doc, plugin, page, artboards, numberArtboard, context);
     }
     else {
-      addTableOfContents(doc, plugin, page, artboards, numberArtboard, context, document);
+      addTableOfContents(doc, plugin, page, artboards, numberArtboard, context);
     }
   }
-}
 
-function showCheckWindow(doc, plugin, page, artboards, numberArtboard, context, document) {
+function showCheckWindow(doc, plugin, page, artboards, numberArtboard, context) {
   var alertWindow = COSAlertWindow.new()
   alertWindow.setMessageText('Do you want to refresh or delete your Table of Contents?')
 
@@ -34,7 +33,7 @@ function showCheckWindow(doc, plugin, page, artboards, numberArtboard, context, 
     deleteTableOfContents(artboards);
     var a = doc.currentPage().artboards();
     var n = a.length;
-    addTableOfContents(doc, plugin, page, a, n, context, document);
+    addTableOfContents(doc, plugin, page, a, n, context);
     [doc showMessage: "Table of Contents refreshed."]
 
   } else {
@@ -45,18 +44,23 @@ function showCheckWindow(doc, plugin, page, artboards, numberArtboard, context, 
 
 function showAlertWindow() {
   var alertWindow = COSAlertWindow.new()
-  // Checkbox
-  var regexpRename = regexpRename || {};
 
-  regexpRename.createCheckbox = function ( label, value, flag ) {
-    flag = ( flag == false ) ? NSOffState : NSOnState;
-    var checkbox = NSButton.alloc().initWithFrame( NSMakeRect( 0, 0, 300, 18 ) );
-    checkbox.setButtonType( NSSwitchButton );
-    checkbox.setTitle( label );
-    checkbox.setTag( value );
-    checkbox.setState( flag );
-    return checkbox;
-  }
+// Checkbox
+var regexpRename = regexpRename || {};
+
+regexpRename.createCheckbox = function ( label, value, flag ) {
+  
+  flag = ( flag == false ) ? NSOffState : NSOnState;
+
+  var checkbox = NSButton.alloc().initWithFrame( NSMakeRect( 0, 0, 300, 18 ) );
+  checkbox.setButtonType( NSSwitchButton );
+  checkbox.setTitle( label );
+  checkbox.setTag( value );
+  checkbox.setState( flag );
+
+  return checkbox;
+}
+
 
   alertWindow.setMessageText('Create Table of Contents')
 
@@ -100,8 +104,8 @@ function UserInput(color, margin, fsize, titleN, pageN) {
 
 function deleteTableOfContents(a){
   var n = a.length
-    a[n-2].removeFromParent();
-    for(var i = 0; i < n-2; i++) {
+    a[n-1].removeFromParent();
+    for(var i = 0; i < n-1; i++) {
       var temp = a[i];
       var l = (temp.children().toString().match(/</g) || []).length;
       
@@ -114,11 +118,12 @@ function deleteTableOfContents(a){
     }
 }
 
-function addTableOfContents(doc, plugin, page, artboards, numberArtboard, context, document) {
+function addTableOfContents(doc, plugin, page, artboards, numberArtboard, context) {
       var userInput = showAlertWindow();
       if(userInput != null) {
         // Create New Artboard
         var currentPage = document.selectedPage
+        
         var firstArtboard = artboards[numberArtboard-2];
         newArtboardWidth = [[firstArtboard frame] width]
         newArtboardHeight = [[firstArtboard frame] height]
@@ -138,27 +143,33 @@ function addTableOfContents(doc, plugin, page, artboards, numberArtboard, contex
         [newArtboardFrame setX:newArtboardX]
         [newArtboardFrame setY:newArtboardY]
   
-        // Create Background Rect
+//         var rect = newArtboardc.newShape({frame: new sketch.Rectangle(0, 0, newArtboardWidth, newArtboardHeight)});
+// 
+// rect.style().addStylePartOfType(0).setColor(userInput.color);
+
+
+// Create Background Rect
         var shape = MSShapeGroup.shapeWithPath(MSRectangleShape.alloc().initWithFrame(NSMakeRect(0, 0, newArtboardWidth,newArtboardHeight)));
         shape.style().addStylePartOfType(0).setColor(MSImmutableColor.colorWithSVGString(userInput.color).newMutableCounterpart());
-        shape.setName("background");
+shape.setName("background");
 
-        var text = MSTextLayer.new();
-        text.setName("Table of Contents");
-        text.frame().setX(100);
-        text.frame().setY(100);
-        text.setStringValue("Table of Contents");
-        text.addAttribute_value(NSFontAttributeName, NSFont.fontWithName_size("Fira Sans Light Italic", 44));
-        text.setTextColor(MSImmutableColor.colorWithSVGString("#ffffff").newMutableCounterpart());
-        text.adjustFrameToFit();
-        selected_artboard.addLayers([shape,text]);
+
+var text = MSTextLayer.new();
+text.setName("Table of Contents");
+text.frame().setX(100);
+text.frame().setY(100);
+text.setStringValue("Table of Contents");
+text.addAttribute_value(NSFontAttributeName, NSFont.fontWithName_size("Fira Sans Light Italic", 44));
+text.setTextColor(MSImmutableColor.colorWithSVGString("#ffffff").newMutableCounterpart());
+text.adjustFrameToFit();
+selected_artboard.addLayers([shape,text]);
 
         var count = 0;
         var add = 0;
         var k = 1;
         
         // Create contents with all artboard names
-        for(var i = 1; i < artboards.length-1; i++) {
+        for(var i = 1; i < artboards.length; i++) {
           var temp = artboards[numberArtboard-1-i];
           var l = (temp.children().toString().match(/</g) || []).length;
 
@@ -167,19 +178,20 @@ function addTableOfContents(doc, plugin, page, artboards, numberArtboard, contex
           else {
 
             var header = temp.children()[l-2].toString().split("Header")[1].split(" ")[0];
-            var title = temp.children()[l-2].overrides().toString().split('" = "')[1].split('"')[0];
-            var page = parseInt(i)+2;
+            var title = temp.children()[l-2].overrides().toString().split(" = ")[1].split('";')[0].replace('"','');
+            var page = parseInt(i)+2
 
             if(header == 2 && userInput.pageN == 1) {
+
                 var pnumberLayer = MSTextLayer.new();
-                pnumberLayer.setName("Page Number");
-                pnumberLayer.frame().setX(newArtboardWidth-50);
-                pnumberLayer.frame().setY(newArtboardHeight-50);
-                pnumberLayer.setStringValue(page+"");
-                pnumberLayer.addAttribute_value(NSFontAttributeName, NSFont.fontWithName_size("Fira Sans Light", 16));
-                pnumberLayer.setTextColor(MSImmutableColor.colorWithSVGString("#484848").newMutableCounterpart());
-                pnumberLayer.adjustFrameToFit();
-                temp.addLayers([pnumberLayer]);
+pnumberLayer.setName("Page Number");
+pnumberLayer.frame().setX(newArtboardWidth-50);
+pnumberLayer.frame().setY(newArtboardHeight-50);
+pnumberLayer.setStringValue(page+"");
+pnumberLayer.addAttribute_value(NSFontAttributeName, NSFont.fontWithName_size("Fira Sans Light", 16));
+pnumberLayer.setTextColor(MSImmutableColor.colorWithSVGString("#484848").newMutableCounterpart());
+pnumberLayer.adjustFrameToFit();
+temp.addLayers([pnumberLayer]);
             }
 
             if(title.indexOf("cont") > -1) ;
@@ -190,10 +202,10 @@ function addTableOfContents(doc, plugin, page, artboards, numberArtboard, contex
                   titleNumber = "-";
                 }
                 var textLayer = MSTextLayer.new();
-                textLayer.setName(title);
-                textLayer.setStringValue("    " + titleNumber + title);
-                textLayer.addAttribute_value(NSFontAttributeName, NSFont.fontWithName_size("Fira Sans", userInput.fsize));
-                selected_artboard.addLayers([textLayer]);
+textLayer.setName([temp name]);
+textLayer.setStringValue("    " + titleNumber + title);
+textLayer.addAttribute_value(NSFontAttributeName, NSFont.fontWithName_size("Fira Sans", userInput.fsize));
+selected_artboard.addLayers([textLayer]);
 
                 k++
               } else {
@@ -203,31 +215,32 @@ function addTableOfContents(doc, plugin, page, artboards, numberArtboard, contex
                   titleNumber = "";
                 }
 
-                var textLayer = MSTextLayer.new();
-                textLayer.setName(title);
-                textLayer.setStringValue(titleNumber + title);
-                textLayer.addAttribute_value(NSFontAttributeName, NSFont.fontWithName_size("Fira Sans", userInput.fsize));
-                selected_artboard.addLayers([textLayer]);
+var textLayer = MSTextLayer.new();
+textLayer.setName([temp name]);
+textLayer.setStringValue(titleNumber + title);
+textLayer.addAttribute_value(NSFontAttributeName, NSFont.fontWithName_size("Fira Sans", userInput.fsize));
+selected_artboard.addLayers([textLayer]);
 
                 k = 1;
               }
               if(userInput.pageN == 1) {
-                var numberLayer = MSTextLayer.new();
-                numberLayer.setName(page+"");
-                numberLayer.setStringValue(page+"");
-                numberLayer.addAttribute_value(NSFontAttributeName, NSFont.fontWithName_size("Fira Sans", userInput.fsize));
-                selected_artboard.addLayers([numberLayer]);
+                
+var numberLayer = MSTextLayer.new();
+numberLayer.setName(page+"");
+numberLayer.setStringValue(page+"");
+numberLayer.addAttribute_value(NSFontAttributeName, NSFont.fontWithName_size("Fira Sans", userInput.fsize));
+selected_artboard.addLayers([numberLayer]);
               }
 
               // set content position
-              textLayer.frame().setX(100 + 500*parseInt(add/15));
-              textLayer.frame().setY(100+(add%15)*(24+parseInt(userInput.margin)) + 120);
-              textLayer.setTextColor(MSImmutableColor.colorWithSVGString("#FFF").newMutableCounterpart());
+textLayer.frame().setX(100 + 500*parseInt(add/15));
+textLayer.frame().setY(100+(add%15)*(24+parseInt(userInput.margin)) + 120);
+textLayer.setTextColor(MSImmutableColor.colorWithSVGString("#FFF").newMutableCounterpart());
 
               if(userInput.pageN == 1) {
-                numberLayer.frame().setX(500 + 500*parseInt(add/15));
-                numberLayer.frame().setY(100+(add%15)*(24+parseInt(userInput.margin)) + 120);
-                numberLayer.setTextColor(MSImmutableColor.colorWithSVGString("#FFF").newMutableCounterpart());
+numberLayer.frame().setX(500 + 500*parseInt(add/15));
+numberLayer.frame().setY(100+(add%15)*(24+parseInt(userInput.margin)) + 120);
+numberLayer.setTextColor(MSImmutableColor.colorWithSVGString("#FFF").newMutableCounterpart());
               }
 
               add++;
@@ -235,19 +248,8 @@ function addTableOfContents(doc, plugin, page, artboards, numberArtboard, contex
           }
         }
 
-        artboards = doc.currentPage().artboards()
-        
-        var selection = [artboards subarrayWithRange:NSMakeRange(numberArtboard-1,2)];
-        var moveBack = sendActionTimes.bind(null, context, 'moveBackward:')
-        getSteps(selection, sortLayers(selection, false))
-          .forEach(function(steps) {
-            moveBack(steps.layer, steps.steps)
-          })
-
-        var view = [doc currentView];
-        artboards = doc.currentPage().artboards()  
-        var selected_artboard = artboards[numberArtboard-1];
         [selected_artboard select:true byExpandingSelection:false];
         [view zoomToSelection];
       }
+}
 }
