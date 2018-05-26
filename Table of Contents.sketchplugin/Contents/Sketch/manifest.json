@@ -7,13 +7,13 @@
       "shortcut" : "cmd ctrl option t",
       "name" : "Table of Contents",
       "identifier" : "tableofcontents"
-    },
+    }
   ],
   "menu": {
     "isRoot": true,
     "items": [
-      "tableofcontents",
-    ],
+      "tableofcontents"
+    ]
   },
   "identifier" : "com.example.sketch.tableofcontents",
   "version" : "1.2",
