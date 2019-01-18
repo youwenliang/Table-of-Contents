@@ -9,6 +9,7 @@ var onRun = function(context) {
   var page = [doc currentPage];   // the current page (MSPage)
   var artboards = doc.currentPage().artboards();
   var numberArtboard = artboards.length;
+  var Text = require('sketch/dom').Text
 
   // Prompt Dialog
   if(numberArtboard > 2) {
@@ -61,32 +62,35 @@ regexpRename.createCheckbox = function ( label, value, flag ) {
   return checkbox;
 }
 
-
   alertWindow.setMessageText('Create Table of Contents')
 
   alertWindow.addTextLabelWithValue('Enter background color')
-  alertWindow.addTextFieldWithValue('#3C96C7') 
+  alertWindow.addTextFieldWithValue('#FFFFFF') 
+
+  alertWindow.addTextLabelWithValue('Enter text color')
+  alertWindow.addTextFieldWithValue('#4a4a4a') 
 
   alertWindow.addTextLabelWithValue('Enter margin between contents')
-  alertWindow.addTextFieldWithValue('20')
+  alertWindow.addTextFieldWithValue('50')
 
   alertWindow.addTextLabelWithValue('Enter contents font size')
   alertWindow.addTextFieldWithValue('20')
 
-  alertWindow.addAccessoryView( regexpRename.createCheckbox( 'Add numbers to title', 'a', true ) )
-  alertWindow.addAccessoryView( regexpRename.createCheckbox( 'Show page numbers', 's', true ) )
+  //alertWindow.addAccessoryView( regexpRename.createCheckbox( 'Add numbers to title', 'a', true ) )
+  //alertWindow.addAccessoryView( regexpRename.createCheckbox( 'Show page numbers', 's', true ) )
 
   alertWindow.addButtonWithTitle('OK')
   alertWindow.addButtonWithTitle('Cancel')
 
   if (alertWindow.runModal() == -NSModalResponseStop) {
-//     [doc showMessage: "Table of Contents created."]
+      [doc showMessage: "Table of Contents created."]
       return new UserInput(
           alertWindow.viewAtIndex(1).stringValue(),
           alertWindow.viewAtIndex(3).stringValue(),
           alertWindow.viewAtIndex(5).stringValue(),
-          alertWindow.viewAtIndex(6).state(),
-          alertWindow.viewAtIndex(7).state()
+          alertWindow.viewAtIndex(7).stringValue(),
+          //alertWindow.viewAtIndex(8).state(),
+          //alertWindow.viewAtIndex(9).state()
       )
   } else {
       return null
@@ -94,12 +98,13 @@ regexpRename.createCheckbox = function ( label, value, flag ) {
 }
 
 // Dialog Results
-function UserInput(color, margin, fsize, titleN, pageN) {
-    this.color = color
+function UserInput(bgColor, txtColor, margin, fsize) {
+    this.bgColor = bgColor
+    this.txtColor = txtColor
     this.margin = margin
     this.fsize = fsize
-    this.titleN = titleN
-    this.pageN = pageN
+    //this.titleN = titleN
+    //this.pageN = pageN
 }
 
 function deleteTableOfContents(a){
@@ -132,7 +137,7 @@ function addTableOfContents(doc, plugin, page, artboards, numberArtboard, contex
         
         var newArtboardc = currentPage.newArtboard({"name" : "Table of Contents"})
         
-        var view = [doc currentView];
+        var view = [doc contentDrawView];
         artboards = doc.currentPage().artboards()  
         var selected_artboard = artboards[numberArtboard];
         
@@ -142,110 +147,191 @@ function addTableOfContents(doc, plugin, page, artboards, numberArtboard, contex
         [newArtboardFrame setHeight:newArtboardHeight]
         [newArtboardFrame setX:newArtboardX]
         [newArtboardFrame setY:newArtboardY]
-  
-//         var rect = newArtboardc.newShape({frame: new sketch.Rectangle(0, 0, newArtboardWidth, newArtboardHeight)});
-// 
-// rect.style().addStylePartOfType(0).setColor(userInput.color);
+        
+        var myStyle = new sketch.Style()
+        myStyle.fills = [userInput.bgColor];
 
+        var rect = newArtboardc.newShape({
+          frame: new sketch.Rectangle(0, 0, newArtboardWidth, newArtboardHeight), 
+          style: myStyle, 
+          name: "background"
+        });
 
-// Create Background Rect
-        var shape = MSShapeGroup.shapeWithPath(MSRectangleShape.alloc().initWithFrame(NSMakeRect(0, 0, newArtboardWidth,newArtboardHeight)));
-        shape.style().addStylePartOfType(0).setColor(MSImmutableColor.colorWithSVGString(userInput.color).newMutableCounterpart());
-shape.setName("background");
+        var textTitle = new Text({
+          text: "TABLE OF CONTENTS",
+          frame: new sketch.Rectangle(75, 24, newArtboardWidth, newArtboardHeight), 
+          parent: selected_artboard,
+          style: {
+            textColor: ""+userInput.txtColor,
+            fontFamily: 'SF UI Text',
+            fontSize: 32,
+            alignment: 'left',
+          }
+        });
 
+        textTitle.systemFontSize = 32;
 
-var text = MSTextLayer.new();
-text.setName("Table of Contents");
-text.frame().setX(100);
-text.frame().setY(100);
-text.setStringValue("Table of Contents");
-text.addAttribute_value(NSFontAttributeName, NSFont.fontWithName_size("Fira Sans Light Italic", 44));
-text.setTextColor(MSImmutableColor.colorWithSVGString("#ffffff").newMutableCounterpart());
-text.adjustFrameToFit();
-selected_artboard.addLayers([shape,text]);
+// var text = MSTextLayer.new();
+// text.setName("Table of Contents");
+// text.frame().setX(100);
+// text.frame().setY(100);
+// text.setStringValue("Table of Contents");
+// text.adjustFrameToFit();
+// selected_artboard.addLayers([shape,text]);
 
         var count = 0;
         var add = 0;
         var k = 1;
+        var flag = 0;
+        var row = Math.floor((newArtboardHeight - 105) / userInput.margin);
+        var pcolor = ""+userInput.txtColor;
         
         // Create contents with all artboard names
         for(var i = 1; i < artboards.length; i++) {
           var temp = artboards[numberArtboard-1-i];
           var l = (temp.children().toString().match(/</g) || []).length;
-
-          if(l <= 1) ;
-          else if(temp.children()[l-2].toString().split("Header")[1] == null) ;
-          else {
-
-            var header = temp.children()[l-2].toString().split("Header")[1].split(" ")[0];
-            var title = temp.children()[l-2].overrides().toString().split(" = ")[1].split('";')[0].replace('"','');
-            var page = parseInt(i)+2
-
-            if(header == 2 && userInput.pageN == 1) {
-
-                var pnumberLayer = MSTextLayer.new();
-pnumberLayer.setName("Page Number");
-pnumberLayer.frame().setX(newArtboardWidth-50);
-pnumberLayer.frame().setY(newArtboardHeight-50);
-pnumberLayer.setStringValue(page+"");
-pnumberLayer.addAttribute_value(NSFontAttributeName, NSFont.fontWithName_size("Fira Sans Light", 16));
-pnumberLayer.setTextColor(MSImmutableColor.colorWithSVGString("#484848").newMutableCounterpart());
-pnumberLayer.adjustFrameToFit();
-temp.addLayers([pnumberLayer]);
+          var testString = ""
+          for(var j = 0; j < l; j++) {
+            if(temp.children()[j].name() == "Header1") {
+              testString = temp.children()[j].children()[1].stringValue().replace(/(\r\n\t|\n|\r\t)/gm, "");
+              flag = 1;
+              pcolor = "#ffffff";
+              break;
             }
-
-            if(title.indexOf("cont") > -1) ;
-            else {
-              if(header == 2 && count != 0) {
-                var titleNumber = count + "." + k + " ";
-                if(userInput.titleN == 0) {
-                  titleNumber = "-";
-                }
-                var textLayer = MSTextLayer.new();
-textLayer.setName([temp name]);
-textLayer.setStringValue("    " + titleNumber + title);
-textLayer.addAttribute_value(NSFontAttributeName, NSFont.fontWithName_size("Fira Sans", userInput.fsize));
-selected_artboard.addLayers([textLayer]);
-
-                k++
-              } else {
-                count++;
-                var titleNumber = count + ". ";
-                if(userInput.titleN == 0) {
-                  titleNumber = "";
-                }
-
-var textLayer = MSTextLayer.new();
-textLayer.setName([temp name]);
-textLayer.setStringValue(titleNumber + title);
-textLayer.addAttribute_value(NSFontAttributeName, NSFont.fontWithName_size("Fira Sans", userInput.fsize));
-selected_artboard.addLayers([textLayer]);
-
-                k = 1;
-              }
-              if(userInput.pageN == 1) {
-                
-var numberLayer = MSTextLayer.new();
-numberLayer.setName(page+"");
-numberLayer.setStringValue(page+"");
-numberLayer.addAttribute_value(NSFontAttributeName, NSFont.fontWithName_size("Fira Sans", userInput.fsize));
-selected_artboard.addLayers([numberLayer]);
-              }
-
-              // set content position
-textLayer.frame().setX(100 + 500*parseInt(add/15));
-textLayer.frame().setY(100+(add%15)*(24+parseInt(userInput.margin)) + 120);
-textLayer.setTextColor(MSImmutableColor.colorWithSVGString("#FFF").newMutableCounterpart());
-
-              if(userInput.pageN == 1) {
-numberLayer.frame().setX(500 + 500*parseInt(add/15));
-numberLayer.frame().setY(100+(add%15)*(24+parseInt(userInput.margin)) + 120);
-numberLayer.setTextColor(MSImmutableColor.colorWithSVGString("#FFF").newMutableCounterpart());
-              }
-
-              add++;
+            if(temp.children()[j].name() == "Header2") {
+              testString = temp.children()[j].children()[1].stringValue().replace(/(\r\n\t|\n|\r\t)/gm, "");
+              flag = 2;
+              break;
             }
           }
+          var irow = i;
+          var page = parseInt(i)+2
+          if(page < 4) page = ""
+          if(i < row) irow = i - 2;
+
+          var titleFrame = new sketch.Rectangle(75+30*(flag-1)+userInput.margin*16*Math.floor(i/row), 105+userInput.margin*(irow%row), newArtboardWidth, newArtboardHeight);
+          var pageNumberFrame = new sketch.Rectangle(userInput.margin*15+userInput.margin*16*Math.floor(i/row), 105+userInput.margin*(irow%row), newArtboardWidth, newArtboardHeight);
+
+          var text = new Text({
+            text: testString,
+            frame: titleFrame,
+            parent: selected_artboard,
+            style: {
+              textColor: ""+userInput.txtColor,
+              fontFamily: 'SF UI Text',
+              fontSize: userInput.fsize,
+              alignment: 'left',
+            }
+          });
+
+          var ptext = new Text({
+            text: page+"",
+            frame: pageNumberFrame,
+            parent: selected_artboard,
+            style: {
+              textColor: ""+userInput.txtColor,
+              fontFamily: 'SF UI Text',
+              fontSize: userInput.fsize,
+              alignment: 'left',
+            }
+          });
+
+          text.systemFontSize = userInput.fsize;
+          ptext.systemFontSize = userInput.fsize;
+
+          var p = "";
+          if(page !== "") p = "Page "+page;
+
+          var pnumber = new Text({
+            text: p,
+            name: "Page Number",
+            frame: new sketch.Rectangle(newArtboardWidth-90, newArtboardHeight-50, 50, 50), 
+            parent: temp,
+            style: {
+              textColor: pcolor,
+              fontFamily: 'SF UI Text',
+              fontSize: 16,
+              alignment: 'right',
+            }
+          });
+
+          pnumber.systemFontSize = 16;
+
+//           if(l <= 1) ;
+//           else if(temp.children()[l-2].toString().split("Header")[1] == null) ;
+//           else {
+
+//             var header = temp.children()[l-2].toString().split("Header")[1].split(" ")[0];
+//             var title = temp.children()[l-2].overrides().toString().split(" = ")[1].split('";')[0].replace('"','');
+//             var page = parseInt(i)+2
+
+//             if(header == 2 && userInput.pageN == 1) {
+//                 var pnumber = new Text({
+//                   text: ""+page,
+//                   name: "Page Number",
+//                   frame: new sketch.Rectangle(newArtboardWidth-50, newArtboardHeight-50, newArtboardWidth, newArtboardHeight), 
+//                   parent: temp,
+//                   style: {
+//                     textColor: ""+userInput.txtColor,
+//                     fontFamily: 'SF UI Text',
+//                     fontSize: 16,
+//                     alignment: 'right',
+//                   }
+//                 });
+//             }
+
+//             if(title.indexOf("cont") > -1) ;
+//             else {
+//               if(header == 2 && count != 0) {
+//                 var titleNumber = count + "." + k + " ";
+//                 if(userInput.titleN == 0) {
+//                   titleNumber = "-";
+//                 }
+//                 var textLayer = MSTextLayer.new();
+// textLayer.setName([temp name]);
+// textLayer.setStringValue("    " + titleNumber + title);
+// textLayer.addAttribute_value(NSFontAttributeName, NSFont.fontWithName_size("Fira Sans", userInput.fsize));
+// selected_artboard.addLayers([textLayer]);
+
+//                 k++
+//               } else {
+//                 count++;
+//                 var titleNumber = count + ". ";
+//                 if(userInput.titleN == 0) {
+//                   titleNumber = "";
+//                 }
+
+// var textLayer = MSTextLayer.new();
+// textLayer.setName([temp name]);
+// textLayer.setStringValue(titleNumber + title);
+// textLayer.addAttribute_value(NSFontAttributeName, NSFont.fontWithName_size("Fira Sans", userInput.fsize));
+// selected_artboard.addLayers([textLayer]);
+
+//                 k = 1;
+//               }
+//               if(userInput.pageN == 1) {
+                
+// var numberLayer = MSTextLayer.new();
+// numberLayer.setName(page+"");
+// numberLayer.setStringValue(page+"");
+// numberLayer.addAttribute_value(NSFontAttributeName, NSFont.fontWithName_size("Fira Sans", userInput.fsize));
+// selected_artboard.addLayers([numberLayer]);
+//               }
+
+//               // set content position
+// textLayer.frame().setX(100 + 500*parseInt(add/15));
+// textLayer.frame().setY(100+(add%15)*(24+parseInt(userInput.margin)) + 120);
+// textLayer.setTextColor(MSImmutableColor.colorWithSVGString("#FFF").newMutableCounterpart());
+
+//               if(userInput.pageN == 1) {
+// numberLayer.frame().setX(500 + 500*parseInt(add/15));
+// numberLayer.frame().setY(100+(add%15)*(24+parseInt(userInput.margin)) + 120);
+// numberLayer.setTextColor(MSImmutableColor.colorWithSVGString("#FFF").newMutableCounterpart());
+//               }
+
+//               add++;
+//             }
+//           }
         }
 
         [selected_artboard select:true byExpandingSelection:false];
