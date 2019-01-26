@@ -147,6 +147,8 @@ function addTableOfContents(doc, plugin, page, artboards, numberArtboard, contex
         [newArtboardFrame setHeight:newArtboardHeight]
         [newArtboardFrame setX:newArtboardX]
         [newArtboardFrame setY:newArtboardY]
+
+        var TextStyles = MSDocument.currentDocument().documentData().allTextStyles();
         
         var myStyle = new sketch.Style()
         myStyle.fills = [userInput.bgColor];
@@ -185,9 +187,26 @@ function addTableOfContents(doc, plugin, page, artboards, numberArtboard, contex
         var flag = 0;
         var row = Math.floor((newArtboardHeight - 105) / userInput.margin);
         var pcolor = ""+userInput.txtColor;
+        var start = 0;
+        var breaking = false;
+
+        for(var i = 0; i < artboards.length; i++) {
+          var temp = artboards[numberArtboard-1-i];
+          var l = (temp.children().toString().match(/</g) || []).length;
+          for(var j = 0; j < l; j++) {
+            if(temp.children()[j].name() == "Header1") {
+              breaking = true;
+              break;
+            }
+          }
+          if(breaking) {
+            start = i;
+            break;
+          }
+        }
         
         // Create contents with all artboard names
-        for(var i = 1; i < artboards.length; i++) {
+        for(var i = start; i < artboards.length; i++) {
           var temp = artboards[numberArtboard-1-i];
           var l = (temp.children().toString().match(/</g) || []).length;
           var testString = ""
@@ -204,13 +223,11 @@ function addTableOfContents(doc, plugin, page, artboards, numberArtboard, contex
               break;
             }
           }
-          var irow = i;
-          var page = parseInt(i)+2
-          if(page < 4) page = ""
-          if(i < row) irow = i - 2;
+          var page = parseInt(i) + 2;
+          if(page < start+2) page = "";
 
-          var titleFrame = new sketch.Rectangle(75+30*(flag-1)+userInput.margin*16*Math.floor(i/row), 105+userInput.margin*(irow%row), newArtboardWidth, newArtboardHeight);
-          var pageNumberFrame = new sketch.Rectangle(userInput.margin*15+userInput.margin*16*Math.floor(i/row), 105+userInput.margin*(irow%row), newArtboardWidth, newArtboardHeight);
+          var titleFrame = new sketch.Rectangle(75+30*(flag-1)+userInput.margin*16*Math.floor((i-start)/row), 105+userInput.margin*((i-start)%row), newArtboardWidth, newArtboardHeight);
+          var pageNumberFrame = new sketch.Rectangle(userInput.margin*15+userInput.margin*16*Math.floor((i-start)/row), 105+userInput.margin*((i-start)%row), newArtboardWidth, newArtboardHeight);
 
           var text = new Text({
             text: testString,
