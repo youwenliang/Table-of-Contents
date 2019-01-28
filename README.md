@@ -4,7 +4,7 @@ This is a Sketch Plugin I created upon a request from our Mozilla UX team. As a 
 ## Artboads Setup
 1. Artboard size: larger than 1440 x 1024 preferred.
 2. Artboard order: top first (Export as PDF order).
-3. Having a Cover as the first artboard & Release Notes or Version History as the second.
+3. Having a Cover as the first artboard & Release Notes or Version History as the second (Support multiple version history pages now).
 
 ## Titles Setup
 1. Use **Folders** named "Header1" & "Header2" as first level titles & second level titles.
@@ -29,7 +29,7 @@ Shortcut: <kbd>control</kbd> + <kbd>option</kbd> + <kbd>⌘command</kbd> + <kbd>
 ## Additional Options:  
 You can change the artboard background color, or change the margin and font size according to the amount of your contents.
 
-## Updates: 
+## Refresh / Delete your ToC: 
 If you've already generated a Table of Contents, you can click the button (<kbd>control</kbd> + <kbd>option</kbd> + <kbd>⌘command</kbd> + <kbd>T</kbd>) again to refresh or delete your current Table of Contents.
 
 ![Options](https://github.com/youwenliang/Table-of-Contents/blob/master/Images/Sketch%20Options1.png)
