@@ -1,4 +1,6 @@
 # Table-of-Contents
+**Updates (1/28)**: Made the plugin compatible with Sketch 53 beta.
+
 This is a Sketch Plugin I created upon a request from our Mozilla UX team. As a memember of the UX team we usually have to create different specs using Sketch, and we have to manually add a "Table of Contents" page to list out the contents. For this plugin you can just press the shortcut and it will automatically generate a Table of Contents page for you. (There are some rules to follow when you create your spec.)
 
 ![Create ToC Menu](https://github.com/youwenliang/Table-of-Contents/blob/master/Images/Screen%20Shot%202019-01-28%20at%202.59.21%20PM.png)
