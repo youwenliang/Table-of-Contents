@@ -220,6 +220,7 @@ function addTableOfContents(doc, plugin, page, artboards, numberArtboard, contex
             if(temp.children()[j].name() == "Header2") {
               testString = temp.children()[j].children()[1].stringValue().replace(/(\r\n\t|\n|\r\t)/gm, "");
               flag = 2;
+              pcolor = "#000000";
               break;
             }
           }
