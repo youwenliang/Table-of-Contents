@@ -171,8 +171,6 @@ function addTableOfContents(doc, plugin, page, artboards, numberArtboard, contex
           }
         });
 
-        textTitle.systemFontSize = 32;
-
 // var text = MSTextLayer.new();
 // text.setName("Table of Contents");
 // text.frame().setX(100);
@@ -254,9 +252,6 @@ function addTableOfContents(doc, plugin, page, artboards, numberArtboard, contex
             }
           });
 
-          text.systemFontSize = userInput.fsize;
-          ptext.systemFontSize = userInput.fsize;
-
           var p = "";
           if(page !== "") p = "Page "+page;
 
@@ -273,7 +268,6 @@ function addTableOfContents(doc, plugin, page, artboards, numberArtboard, contex
             }
           });
 
-          pnumber.systemFontSize = 16;
 
 //           if(l <= 1) ;
 //           else if(temp.children()[l-2].toString().split("Header")[1] == null) ;
